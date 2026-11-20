@@ -1,0 +1,74 @@
+[
+  {
+    "scenario": "B_apts_rich",
+    "n": 12411,
+    "cv_r2_mean": 0.8995,
+    "cv_r2_std": 0.0036,
+    "holdout_r2": 0.8948,
+    "mae": 241483.0,
+    "mape": 18.93
+  },
+  {
+    "scenario": "B_apts_parity",
+    "n": 12411,
+    "cv_r2_mean": 0.8852,
+    "cv_r2_std": 0.0051,
+    "holdout_r2": 0.8805,
+    "mae": 258989.0,
+    "mape": 20.4
+  },
+  {
+    "scenario": "B_all_rich",
+    "n": 15467,
+    "cv_r2_mean": 0.8751,
+    "cv_r2_std": 0.0053,
+    "holdout_r2": 0.8702,
+    "mae": 265845.0,
+    "mape": 21.26
+  },
+  {
+    "scenario": "B_all_parity",
+    "n": 15467,
+    "cv_r2_mean": 0.8506,
+    "cv_r2_std": 0.0065,
+    "holdout_r2": 0.8454,
+    "mae": 291673.0,
+    "mape": 23.53
+  },
+  {
+    "scenario": "C_apts_parity",
+    "n": 26803,
+    "cv_r2_mean": 0.8399,
+    "cv_r2_std": 0.0061,
+    "holdout_r2": 0.8356,
+    "mae": 365869.0,
+    "mape": 23.75
+  },
+  {
+    "scenario": "C_all_parity",
+    "n": 29859,
+    "cv_r2_mean": 0.8263,
+    "cv_r2_std": 0.0052,
+    "holdout_r2": 0.8164,
+    "mae": 372314.0,
+    "mape": 25.0
+  },
+  {
+    "scenario": "A_native_parity",
+    "n": 14392,
+    "cv_r2_mean": 0.7788,
+    "cv_r2_std": 0.0043,
+    "holdout_r2": 0.7871,
+    "mae": 445884.0,
+    "mape": 25.74
+  },
+  {
+    "scenario": "A_centroid_parity",
+    "n": 14392,
+    "cv_r2_mean": 0.7672,
+    "cv_r2_std": 0.0068,
+    "holdout_r2": 0.779,
+    "mae": 457995.0,
+    "mape": 26.35
+  }
+]

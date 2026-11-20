@@ -1,0 +1,28 @@
+{
+  "coarse": {
+    "params": {
+      "hgb__l2_regularization": 1.0,
+      "hgb__learning_rate": 0.05,
+      "hgb__max_depth": null,
+      "hgb__max_leaf_nodes": 63
+    },
+    "cv_r2": 0.88342
+  },
+  "fine": {
+    "params": {
+      "hgb__l2_regularization": 1.5,
+      "hgb__learning_rate": 0.03,
+      "hgb__max_depth": 16,
+      "hgb__max_leaf_nodes": 47
+    },
+    "cv_r2": 0.88388
+  },
+  "metrics": {
+    "r2_test": 0.87861,
+    "r2_cv_mean": 0.88388,
+    "mae_test": 263139.75,
+    "mape_test": 20.7,
+    "baseline_base_antiga_cv_r2": 0.7788
+  },
+  "n_apartamentos": 12411
+}

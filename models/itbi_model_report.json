@@ -1,0 +1,27 @@
+{
+  "coarse": {
+    "params": {
+      "hgb__l2_regularization": 0.0,
+      "hgb__learning_rate": 0.05,
+      "hgb__max_depth": null,
+      "hgb__max_leaf_nodes": 63
+    },
+    "cv_r2": 0.83825
+  },
+  "fine": {
+    "params": {
+      "hgb__l2_regularization": 0.5,
+      "hgb__learning_rate": 0.03,
+      "hgb__max_depth": 16,
+      "hgb__max_leaf_nodes": 94
+    },
+    "cv_r2": 0.8385
+  },
+  "metrics": {
+    "r2_test": 0.83712,
+    "r2_cv_mean": 0.8385,
+    "mae_test": 136740.9,
+    "mape_test": 24.36,
+    "n": 60067
+  }
+}

@@ -1,0 +1,64 @@
+[project]
+name = "auction-intel"
+version = "1.0.0"
+description = "Valor justo de imóveis de leilão em São Paulo com machine learning, cálculo de ROI e leitura do edital com LLM."
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+    { name = "Guilherme Haddad Borro" },
+    { name = "Luiz Eduardo Bacha dos Santos" },
+]
+dependencies = [
+    "fastapi>=0.128.0",
+    "uvicorn>=0.40.0",
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+    "python-dotenv>=1.0.0",
+    "sqlalchemy>=2.0.48",
+    "passlib>=1.7.4",
+    "bcrypt==3.2.2",
+    "requests>=2.32.5",
+    "playwright>=1.40.0",
+    "pymupdf>=1.23.0",       # leitura dos PDFs (edital/matrícula)
+    "openai>=1.0.0",         # cliente do LLM (endpoint compatível com OpenAI)
+    # Os modelos em models/ foram serializados com scikit-learn 1.8.0. Outra versão
+    # não abre os .pkl; ao trocar a versão, retreine os modelos.
+    "scikit-learn==1.8.0",
+    "joblib>=1.5.3",
+    "pandas>=2.0.0",
+    "numpy>=1.26.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=7.0.0",
+    "httpx>=0.27.0",     # requerido pelo fastapi.testclient
+    "ruff>=0.6.0",
+]
+training = [
+    "openpyxl>=3.1.0",   # leitura das planilhas de ITBI (.xlsx)
+    "shapely>=2.0.0",    # centroide dos lotes do GeoSampa (build_sql_coords)
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/auction_intel"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = ["web"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E501"]   # linhas longas ficam a cargo do formatador
+
+[tool.ruff.lint.per-file-ignores]
+"training/*" = ["E741"]

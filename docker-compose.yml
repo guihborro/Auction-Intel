@@ -1,0 +1,10 @@
+# Execução local da MESMA imagem que sobe no Hugging Face Spaces.
+#   docker compose up --build   ->   http://localhost:8000
+services:
+  auction-intel:
+    build: .
+    container_name: auction-intel
+    ports:
+      - "8000:7860"        # host 8000 -> container 7860
+    env_file:
+      - .env               # HEADLESS_BROWSER, LLM_API_KEY, LLM_BASE_URL, LLM_MODEL

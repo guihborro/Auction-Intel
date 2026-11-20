@@ -1,0 +1,21 @@
+{
+  "name": "Auction Intel",
+  "image": "mcr.microsoft.com/devcontainers/python:3.12",
+
+  // Ao criar o Codespace: instala uv, dependências e o Chromium do Playwright.
+  "postCreateCommand": "pip install uv && uv sync && uv run playwright install --with-deps chromium",
+
+  // Variáveis não-secretas (a LLM_API_KEY entra como *Codespaces secret*).
+  "remoteEnv": {
+    "HEADLESS_BROWSER": "True",
+    "VARREDURA_MAX_PAGES": "1",
+    "LLM_BASE_URL": "https://openrouter.ai/api/v1",
+    "LLM_MODEL": "google/gemma-4-26b-a4b-it:free"
+  },
+
+  // A app roda na 8000; o Codespaces encaminha e abre um preview.
+  "forwardPorts": [8000],
+  "portsAttributes": {
+    "8000": { "label": "Auction Intel", "onAutoForward": "openPreview" }
+  }
+}

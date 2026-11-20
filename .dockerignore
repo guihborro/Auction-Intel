@@ -1,0 +1,18 @@
+# Contexto de build enxuto: o Dockerfile copia só src/, models/, web/ e os arquivos do projeto.
+.git
+.gitignore
+.github
+.venv
+**/__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+tests/
+training/
+docs/
+datasets/
+*.xlsx
+*.csv
+*.db
+*.sqlite
+.env

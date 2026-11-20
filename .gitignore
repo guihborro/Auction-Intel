@@ -1,0 +1,39 @@
+# Ambientes e cache
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# Segredos
+.env
+
+# Bancos locais
+*.db
+*.sqlite
+
+# Dados brutos e intermediários (grandes e, no caso de editais e matrículas,
+# com dados pessoais): ficam fora do repositório. Veja "Dados" no README.
+datasets/
+editais_pdf/
+*.csv
+*.xlsx
+*.parquet
+
+# Modelos: só os três usados pela aplicação são versionados
+*.pkl
+!models/market_model.pkl
+!models/itbi_model.pkl
+!models/itbi_geo_model.pkl
+
+# Saídas de análise
+analysis_output/
+
+# Editores e sistema
+.vscode/
+.idea/
+.claude/
+.DS_Store
+Thumbs.db
