@@ -12,43 +12,50 @@ Features:
     próprio Pipeline (sklearn TargetEncoder, com cross-fitting anti-vazamento),
     então não é preciso salvar um dicionário de médias à parte.
 """
+
 import re
 import unicodedata
-from typing import Dict, List, Mapping, Sequence, Tuple, Union
+from collections.abc import Mapping, Sequence
 
 import numpy as np
 import pandas as pd
 
 # ── Marcos valorizados ────────────────────────────────────────
-LANDMARKS: Dict[str, Tuple[float, float]] = {
-    "dist_faria_lima":  (-23.5856, -46.6823),
-    "dist_paulista":    (-23.5629, -46.6544),
-    "dist_berrini":     (-23.6006, -46.6967),
-    "dist_ibirapuera":  (-23.5874, -46.6576),
-    "dist_iguatemi":    (-23.5772, -46.6908),
-    "dist_cid_jardim":  (-23.6015, -46.6976),
-    "dist_tatuape":     (-23.5403, -46.5768),
-    "dist_santana":     (-23.5028, -46.6253),
+LANDMARKS: dict[str, tuple[float, float]] = {
+    "dist_faria_lima": (-23.5856, -46.6823),
+    "dist_paulista": (-23.5629, -46.6544),
+    "dist_berrini": (-23.6006, -46.6967),
+    "dist_ibirapuera": (-23.5874, -46.6576),
+    "dist_iguatemi": (-23.5772, -46.6908),
+    "dist_cid_jardim": (-23.6015, -46.6976),
+    "dist_tatuape": (-23.5403, -46.5768),
+    "dist_santana": (-23.5028, -46.6253),
     "dist_centro_hist": (-23.5505, -46.6333),
 }
 
 # ── Estações de metrô ──────────────────────────
-METRO_LANDMARKS: Dict[str, Tuple[float, float]] = {
-    "dist_metro_faria_lima":    (-23.5867, -46.6817),  # L4 Amarela
-    "dist_metro_paulista":      (-23.5644, -46.6527),  # L2 Verde / L4 Amarela
+METRO_LANDMARKS: dict[str, tuple[float, float]] = {
+    "dist_metro_faria_lima": (-23.5867, -46.6817),  # L4 Amarela
+    "dist_metro_paulista": (-23.5644, -46.6527),  # L2 Verde / L4 Amarela
     "dist_metro_vila_madalena": (-23.5534, -46.6902),  # L2 Verde
-    "dist_metro_tatuape":       (-23.5417, -46.5745),  # L3 Vermelha
-    "dist_metro_santana":       (-23.5027, -46.6284),  # L1 Azul
-    "dist_metro_bras":          (-23.5403, -46.6128),  # L3 Vermelha
+    "dist_metro_tatuape": (-23.5417, -46.5745),  # L3 Vermelha
+    "dist_metro_santana": (-23.5027, -46.6284),  # L1 Azul
+    "dist_metro_bras": (-23.5403, -46.6128),  # L3 Vermelha
 }
 
-ALL_LANDMARKS: Dict[str, Tuple[float, float]] = {**LANDMARKS, **METRO_LANDMARKS}
+ALL_LANDMARKS: dict[str, tuple[float, float]] = {**LANDMARKS, **METRO_LANDMARKS}
 
 # ── Definição das colunas de features ───────────────────────────────────────
-NUMERIC_BASE: List[str] = [
-    "area", "log_area", "bedrooms", "bathrooms", "garage", "latitude", "longitude",
+NUMERIC_BASE: list[str] = [
+    "area",
+    "log_area",
+    "bedrooms",
+    "bathrooms",
+    "garage",
+    "latitude",
+    "longitude",
 ]
-CATEGORICAL: List[str] = ["district"]
+CATEGORICAL: list[str] = ["district"]
 
 EARTH_RADIUS_KM = 6371.0
 
@@ -88,18 +95,19 @@ def normalize_district_frame(X):
     return col.map(norm_district).to_frame("district")
 
 
-def numeric_features(landmarks: Mapping[str, Tuple[float, float]] = ALL_LANDMARKS) -> List[str]:
+def numeric_features(landmarks: Mapping[str, tuple[float, float]] = ALL_LANDMARKS) -> list[str]:
     """Colunas numéricas na ordem canônica (base + distâncias dos landmarks)."""
     return NUMERIC_BASE + list(landmarks.keys())
 
 
-def feature_columns(landmarks: Mapping[str, Tuple[float, float]] = ALL_LANDMARKS) -> List[str]:
+def feature_columns(landmarks: Mapping[str, tuple[float, float]] = ALL_LANDMARKS) -> list[str]:
     """Todas as colunas de entrada do modelo (numéricas + categórica)."""
     return numeric_features(landmarks) + CATEGORICAL
 
 
-def add_engineered(df: pd.DataFrame,
-                   landmarks: Mapping[str, Tuple[float, float]] = ALL_LANDMARKS) -> pd.DataFrame:
+def add_engineered(
+    df: pd.DataFrame, landmarks: Mapping[str, tuple[float, float]] = ALL_LANDMARKS
+) -> pd.DataFrame:
     """Adiciona `log_area` e as distâncias para cada landmark (não muta o input)."""
     df = df.copy()
     df["log_area"] = np.log1p(df["area"])
@@ -109,8 +117,8 @@ def add_engineered(df: pd.DataFrame,
 
 
 def build_feature_frame(
-    records: Union[pd.DataFrame, Mapping, Sequence[Mapping]],
-    landmarks: Mapping[str, Tuple[float, float]] = ALL_LANDMARKS,
+    records: pd.DataFrame | Mapping | Sequence[Mapping],
+    landmarks: Mapping[str, tuple[float, float]] = ALL_LANDMARKS,
 ) -> pd.DataFrame:
     """Constrói o DataFrame de features pronto para `model.predict`.
 

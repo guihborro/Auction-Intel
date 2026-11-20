@@ -1,5 +1,7 @@
 """Baixa vários anos de ITBI (datasets/itbi_YYYY.xlsx) para ampliar o índice IPTU."""
+
 import os
+
 import requests
 
 URLS = {
@@ -15,19 +17,27 @@ URLS = {
 }
 H = {"User-Agent": "Mozilla/5.0"}
 
-for year, url in URLS.items():
-    out = f"datasets/itbi_{year}.xlsx"
-    if os.path.exists(out):
-        print(f"[skip] {year} já existe", flush=True)
-        continue
-    try:
-        r = requests.get(url, headers=H, timeout=300, stream=True)
-        r.raise_for_status()
-        n = 0
-        with open(out, "wb") as f:
-            for c in r.iter_content(1 << 16):
-                f.write(c); n += len(c)
-        print(f"[ok] {year}: {n/1e6:.1f} MB", flush=True)
-    except Exception as e:
-        print(f"[erro] {year}: {str(e)[:70]}", flush=True)
-print("DOWNLOAD CONCLUIDO.", flush=True)
+
+def main() -> None:
+    os.makedirs("datasets", exist_ok=True)
+    for year, url in URLS.items():
+        out = f"datasets/itbi_{year}.xlsx"
+        if os.path.exists(out):
+            print(f"[skip] {year} já existe", flush=True)
+            continue
+        try:
+            r = requests.get(url, headers=H, timeout=300, stream=True)
+            r.raise_for_status()
+            n = 0
+            with open(out, "wb") as f:
+                for c in r.iter_content(1 << 16):
+                    f.write(c)
+                    n += len(c)
+            print(f"[ok] {year}: {n / 1e6:.1f} MB", flush=True)
+        except Exception as e:
+            print(f"[erro] {year}: {str(e)[:70]}", flush=True)
+    print("DOWNLOAD CONCLUIDO.", flush=True)
+
+
+if __name__ == "__main__":
+    main()

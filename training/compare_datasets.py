@@ -18,6 +18,7 @@ Cenários:
 Métrica primária: R² médio em validação cruzada (5-fold). Também holdout
 R²/MAE/MAPE em R$ reais.
 """
+
 import json
 import re
 import unicodedata
@@ -39,9 +40,15 @@ RS = 42
 
 # Hiperparâmetros afinados (busca coarse-to-fine anterior)
 HGB_PARAMS = dict(
-    learning_rate=0.06, max_depth=None, max_leaf_nodes=63, l2_regularization=0.0,
-    max_iter=600, early_stopping=True, validation_fraction=0.1,
-    n_iter_no_change=20, random_state=RS,
+    learning_rate=0.06,
+    max_depth=None,
+    max_leaf_nodes=63,
+    l2_regularization=0.0,
+    max_iter=600,
+    early_stopping=True,
+    validation_fraction=0.1,
+    n_iter_no_change=20,
+    random_state=RS,
 )
 RICH_EXTRA = ["iptu", "condo", "n_amenities"]
 
@@ -56,10 +63,13 @@ def norm_district(s):
 
 
 def make_pipeline(numeric_cols):
-    pre = ColumnTransformer([
-        ("district_te", TargetEncoder(target_type="continuous", random_state=RS), ["district"]),
-        ("num", StandardScaler(), numeric_cols),
-    ], remainder="drop")
+    pre = ColumnTransformer(
+        [
+            ("district_te", TargetEncoder(target_type="continuous", random_state=RS), ["district"]),
+            ("num", StandardScaler(), numeric_cols),
+        ],
+        remainder="drop",
+    )
     return Pipeline([("pre", pre), ("hgb", HistGradientBoostingRegressor(**HGB_PARAMS))])
 
 
@@ -88,11 +98,19 @@ def evaluate(name, df, extra_numeric=None):
     mae = mean_absolute_error(tr, pr)
     mape = float(np.mean(np.abs((tr - pr) / tr)) * 100)
 
-    res = {"scenario": name, "n": len(df), "cv_r2_mean": round(cv_r2.mean(), 4),
-           "cv_r2_std": round(cv_r2.std(), 4), "holdout_r2": round(float(r2), 4),
-           "mae": round(float(mae), 0), "mape": round(mape, 2)}
-    print(f"  {name:<20} n={len(df):>6} | CV R²={res['cv_r2_mean']:.4f}±{res['cv_r2_std']:.4f}"
-          f" | holdout R²={res['holdout_r2']:.4f} | MAE R$ {mae:>10,.0f} | MAPE {mape:5.1f}%")
+    res = {
+        "scenario": name,
+        "n": len(df),
+        "cv_r2_mean": round(cv_r2.mean(), 4),
+        "cv_r2_std": round(cv_r2.std(), 4),
+        "holdout_r2": round(float(r2), 4),
+        "mae": round(float(mae), 0),
+        "mape": round(mape, 2),
+    }
+    print(
+        f"  {name:<20} n={len(df):>6} | CV R²={res['cv_r2_mean']:.4f}±{res['cv_r2_std']:.4f}"
+        f" | holdout R²={res['holdout_r2']:.4f} | MAE R$ {mae:>10,.0f} | MAPE {mape:5.1f}%"
+    )
     return res
 
 
@@ -110,7 +128,16 @@ def main():
     b = pd.read_csv(BASE_2024)
     a_cen = to_centroid_geo(a)
     b_apts = b[b.category == "Apartamentos"].copy()
-    parity = ["area", "bedrooms", "bathrooms", "garage", "latitude", "longitude", "district", "price"]
+    parity = [
+        "area",
+        "bedrooms",
+        "bathrooms",
+        "garage",
+        "latitude",
+        "longitude",
+        "district",
+        "price",
+    ]
 
     print("=" * 110)
     print("COMPARATIVO DE BASES (mesmo modelo, mesmo protocolo)")
@@ -122,14 +149,20 @@ def main():
     results.append(evaluate("B_all_parity", b[parity]))
     results.append(evaluate("B_apts_rich", b_apts, extra_numeric=RICH_EXTRA))
     results.append(evaluate("B_all_rich", b, extra_numeric=RICH_EXTRA))
-    results.append(evaluate("C_apts_parity", pd.concat([a_cen[parity], b_apts[parity]], ignore_index=True)))
-    results.append(evaluate("C_all_parity", pd.concat([a_cen[parity], b[parity]], ignore_index=True)))
+    results.append(
+        evaluate("C_apts_parity", pd.concat([a_cen[parity], b_apts[parity]], ignore_index=True))
+    )
+    results.append(
+        evaluate("C_all_parity", pd.concat([a_cen[parity], b[parity]], ignore_index=True))
+    )
 
     results.sort(key=lambda r: r["cv_r2_mean"], reverse=True)
     print("\n" + "=" * 110)
     print("RANKING por CV R² (validação cruzada, métrica primária):")
     for i, r in enumerate(results, 1):
-        print(f"  {i}. {r['scenario']:<20} CV R²={r['cv_r2_mean']:.4f} | holdout={r['holdout_r2']:.4f} | MAPE {r['mape']}%")
+        print(
+            f"  {i}. {r['scenario']:<20} CV R²={r['cv_r2_mean']:.4f} | holdout={r['holdout_r2']:.4f} | MAPE {r['mape']}%"
+        )
 
     with open("compare_datasets_report.json", "w", encoding="utf-8") as f:
         json.dump(results, f, ensure_ascii=False, indent=2)

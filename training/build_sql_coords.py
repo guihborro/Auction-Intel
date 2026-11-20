@@ -11,6 +11,7 @@ Descobertas que moldam este script:
 
 Saída: datasets/quadra_coords.csv  (quadra6, latitude, longitude) — resumível.
 """
+
 import os
 import time
 from collections import defaultdict
@@ -28,9 +29,13 @@ H = {"User-Agent": "Mozilla/5.0"}
 def fetch_setor(setor):
     """Retorna {quadra6: (lat, lon)} — centroide médio dos lotes de cada quadra."""
     params = {
-        "service": "WFS", "version": "2.0.0", "request": "GetFeature",
-        "typeNames": "geoportal:lote_cidadao", "outputFormat": "application/json",
-        "srsName": "EPSG:4326", "count": 20000,
+        "service": "WFS",
+        "version": "2.0.0",
+        "request": "GetFeature",
+        "typeNames": "geoportal:lote_cidadao",
+        "outputFormat": "application/json",
+        "srsName": "EPSG:4326",
+        "count": 20000,
         "CQL_FILTER": f"cd_setor_fiscal='{setor}'",
         "propertyName": "cd_setor_fiscal,cd_quadra_fiscal,ge_poligono",
     }
@@ -49,15 +54,17 @@ def fetch_setor(setor):
             continue
         c = shape(geom).centroid
         a = agg[key]
-        a[0] += c.y; a[1] += c.x; a[2] += 1
+        a[0] += c.y
+        a[1] += c.x
+        a[2] += 1
     return {k: (round(v[0] / v[2], 7), round(v[1] / v[2], 7)) for k, v in agg.items() if v[2]}
 
 
 def main():
     itbi = pd.read_csv(ITBI)
     sql11 = itbi["sql"].astype("Int64").astype(str).str.zfill(11)
-    needed = set(sql11.str[:6])                      # quadras (setor+quadra) do ITBI
-    setores = sorted(sql11.str[:3].unique())         # strings zero-paddadas
+    needed = set(sql11.str[:6])  # quadras (setor+quadra) do ITBI
+    setores = sorted(sql11.str[:3].unique())  # strings zero-paddadas
     print(f"{len(needed)} quadras necessárias | {len(setores)} setores")
 
     done = set()
@@ -77,12 +84,15 @@ def main():
                     n = 0
                     for key, (lat, lon) in quadras.items():
                         if key in needed:
-                            f.write(f"{key},{lat},{lon}\n"); n += 1
+                            f.write(f"{key},{lat},{lon}\n")
+                            n += 1
                     f.flush()
                     print(f"[{i}/{len(setores)}] setor {s}: {n} quadras casadas", flush=True)
                     break
                 except Exception as e:
-                    print(f"[{i}/{len(setores)}] setor {s} tent {tent+1}: {str(e)[:50]}", flush=True)
+                    print(
+                        f"[{i}/{len(setores)}] setor {s} tent {tent + 1}: {str(e)[:50]}", flush=True
+                    )
                     time.sleep(3)
     print("CONCLUIDO.")
 

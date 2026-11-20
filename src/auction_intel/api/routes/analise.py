@@ -121,8 +121,7 @@ def realizar_varredura_e_predicao(
         #    A avaliação de cada lote está isolada em `_avaliar_imovel`, reutilizada
         #    também pela versão em streaming (/varredura/stream).
         resultados = [
-            _avaliar_imovel(imovel, tools, engine_market, engine_itbi)
-            for imovel in imoveis_raw
+            _avaliar_imovel(imovel, tools, engine_market, engine_itbi) for imovel in imoveis_raw
         ]
 
         # Ordenação por ROI
@@ -134,7 +133,7 @@ def realizar_varredura_e_predicao(
             target_url=request.url,
             total_properties=len(resultados),
             execution_time_sec=round(tempo_total, 2),
-            success_rate=100.0 # Sucesso total se chegou aqui
+            success_rate=100.0,  # Sucesso total se chegou aqui
         )
         db.add(log)
         db.commit()
@@ -142,8 +141,8 @@ def realizar_varredura_e_predicao(
         return resultados
 
     except Exception as e:
-        db.rollback() # Garante que erros não deixem transações abertas
-        raise HTTPException(status_code=500, detail=f"Erro interno: {str(e)}")
+        db.rollback()  # Garante que erros não deixem transações abertas
+        raise HTTPException(status_code=500, detail=f"Erro interno: {str(e)}") from e
 
 
 @router.post("/varredura/stream", name="analise:varredura_stream")
@@ -160,6 +159,7 @@ def realizar_varredura_stream(
     o front recebe uma linha JSON por evento e vai montando os cards conforme
     chegam. Eventos: status | total | item | done | error.
     """
+
     def eventos():
         start = time.time()
         yield json.dumps({"type": "status", "phase": "scraping"}) + "\n"
@@ -186,12 +186,14 @@ def realizar_varredura_stream(
 
         # Log de auditoria (mesma telemetria da versão em lote).
         try:
-            db.add(models.AuditLog(
-                target_url=request.url,
-                total_properties=avaliados,
-                execution_time_sec=round(time.time() - start, 2),
-                success_rate=100.0,
-            ))
+            db.add(
+                models.AuditLog(
+                    target_url=request.url,
+                    total_properties=avaliados,
+                    execution_time_sec=round(time.time() - start, 2),
+                    success_rate=100.0,
+                )
+            )
             db.commit()
         except Exception:
             db.rollback()

@@ -62,3 +62,7 @@ ignore = ["E501"]   # linhas longas ficam a cargo do formatador
 
 [tool.ruff.lint.per-file-ignores]
 "training/*" = ["E741"]
+
+[tool.ruff.lint.flake8-bugbear]
+# Depends()/Query() como valor padrão é o padrão do FastAPI
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Query"]

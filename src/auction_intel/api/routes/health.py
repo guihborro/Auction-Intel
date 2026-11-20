@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 
+
 # Criamos o schema de output diretamente aqui por ser muito simples e exclusivo desta rota,
 # mas também podes colocá-lo no `app/schemas/output.py` se preferires isolar 100%.
 class HealthOutput(BaseModel):
@@ -8,7 +9,9 @@ class HealthOutput(BaseModel):
     version: str
     author: str
 
+
 router = APIRouter()
+
 
 @router.get(
     "/health",
@@ -54,10 +57,6 @@ def get_health() -> HealthOutput:
     """
 
     # Retornamos os dados diretamente para não dependermos de configurações externas complexas nesta fase de MVP
-    health = HealthOutput(
-        is_alive=True,
-        version="1.0.0",
-        author="Auction Intel / Guilherme"
-    )
+    health = HealthOutput(is_alive=True, version="1.0.0", author="Auction Intel / Guilherme")
 
     return health

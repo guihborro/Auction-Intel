@@ -3,6 +3,7 @@
 Os textos abaixo seguem o formato dos anúncios do Mega Leilões, com
 endereço, matrícula, inscrição e nomes trocados por dados fictícios.
 """
+
 from auction_intel.collection.scraper import parse_detail_fields
 
 # Anúncio 1: tem avaliação, SQL cadastral e ocupação na descrição
@@ -28,7 +29,10 @@ TXT_2 = (
 class TestParseDetailFields:
     def test_endereco_anuncio_1(self):
         r = parse_detail_fields(TXT_1)
-        assert r["full_address"] == "Rua das Flores, 100, Conjunto Residencial Jardim Exemplo, São Paulo, SP"
+        assert (
+            r["full_address"]
+            == "Rua das Flores, 100, Conjunto Residencial Jardim Exemplo, São Paulo, SP"
+        )
 
     def test_ocupacao_anuncio_1(self):
         assert parse_detail_fields(TXT_1)["occupancy"] == "Ocupado"
@@ -40,7 +44,10 @@ class TestParseDetailFields:
         assert parse_detail_fields(TXT_1)["cadastral_sql"] == "123.456.7890-1"
 
     def test_endereco_anuncio_2(self):
-        assert parse_detail_fields(TXT_2)["full_address"] == "Rua Exemplo, 50, Vila Fictícia, São Paulo"
+        assert (
+            parse_detail_fields(TXT_2)["full_address"]
+            == "Rua Exemplo, 50, Vila Fictícia, São Paulo"
+        )
 
     def test_ocupacao_anuncio_2_caixa_alta(self):
         assert parse_detail_fields(TXT_2)["occupancy"] == "Ocupado"
@@ -55,4 +62,9 @@ class TestParseDetailFields:
 
     def test_texto_vazio(self):
         r = parse_detail_fields("")
-        assert r == {"full_address": None, "occupancy": None, "appraisal_value": None, "cadastral_sql": None}
+        assert r == {
+            "full_address": None,
+            "occupancy": None,
+            "appraisal_value": None,
+            "cadastral_sql": None,
+        }

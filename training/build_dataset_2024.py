@@ -15,10 +15,10 @@ Decisões de geolocalização (documentadas):
   atual, tornando-as compatíveis para combinar. Bairros sem correspondência
   (~16%) são descartados para não injetar ruído de geocoding.
 """
+
 import re
 import unicodedata
 
-import numpy as np
 import pandas as pd
 
 SRC_2024 = "datasets/sp_2024_image_based.csv"
@@ -30,11 +30,25 @@ PRICE_MIN, PRICE_MAX = 50_000, 7_000_000
 AREA_MIN, AREA_MAX = 15, 700
 
 AMENITIES = [
-    "Academia", "Elevador", "Permitido animais", "Piscina", "Portaria",
-    "Salão de festas", "Condomínio fechado", "Segurança 24h", "Portão eletrônico",
-    "Área murada", "Área de serviço", "Armários na cozinha", "Armários no quarto",
-    "Churrasqueira", "Mobiliado", "Quarto de serviço", "Ar condicionado",
-    "Porteiro 24h", "Varanda",
+    "Academia",
+    "Elevador",
+    "Permitido animais",
+    "Piscina",
+    "Portaria",
+    "Salão de festas",
+    "Condomínio fechado",
+    "Segurança 24h",
+    "Portão eletrônico",
+    "Área murada",
+    "Área de serviço",
+    "Armários na cozinha",
+    "Armários no quarto",
+    "Churrasqueira",
+    "Mobiliado",
+    "Quarto de serviço",
+    "Ar condicionado",
+    "Porteiro 24h",
+    "Varanda",
 ]
 
 
@@ -42,7 +56,7 @@ def norm_district(s: str) -> str:
     if not isinstance(s, str):
         return ""
     s = unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode()
-    s = re.sub(r"\(.*?\)", "", s)          # remove "(Zona X)"
+    s = re.sub(r"\(.*?\)", "", s)  # remove "(Zona X)"
     s = re.sub(r"[^a-zA-Z ]", " ", s)
     return re.sub(r"\s+", " ", s).strip().lower()
 
@@ -57,19 +71,27 @@ def main():
     b = pd.read_csv(SRC_2024, sep=";", encoding="utf-8-sig")
     print(f"   {len(b)} linhas brutas.")
 
-    b = b.rename(columns={
-        "Área útil": "area", "Quartos": "bedrooms", "Banheiros": "bathrooms",
-        "Vagas na garagem": "garage", "bairro": "district", "Categoria": "category",
-        "IPTU": "iptu", "Condomínio": "condo",
-    })
+    b = b.rename(
+        columns={
+            "Área útil": "area",
+            "Quartos": "bedrooms",
+            "Banheiros": "bathrooms",
+            "Vagas na garagem": "garage",
+            "bairro": "district",
+            "Categoria": "category",
+            "IPTU": "iptu",
+            "Condomínio": "condo",
+        }
+    )
 
     for c in ["area", "bedrooms", "bathrooms", "garage", "price", "iptu", "condo"]:
         b[c] = to_num(b[c])
 
     # Limpeza de faixa
     b = b.dropna(subset=["area", "price"])
-    b = b[(b.price >= PRICE_MIN) & (b.price <= PRICE_MAX)
-          & (b.area > AREA_MIN) & (b.area < AREA_MAX)]
+    b = b[
+        (b.price >= PRICE_MIN) & (b.price <= PRICE_MAX) & (b.area > AREA_MIN) & (b.area < AREA_MAX)
+    ]
     print(f"   {len(b)} após limpeza de faixa (preço/área).")
 
     # Imputação simples dos inteiros faltantes (mediana) — StandardScaler não aceita NaN
@@ -93,7 +115,7 @@ def main():
     b = b.join(centroids, on="dnorm")
     antes = len(b)
     b = b.dropna(subset=["latitude", "longitude"])
-    print(f"   {len(b)}/{antes} com centroide de bairro ({100*len(b)/antes:.1f}%).")
+    print(f"   {len(b)}/{antes} com centroide de bairro ({100 * len(b) / antes:.1f}%).")
 
     # District canônico (usar a forma normalizada, consistente com a base atual)
     b["district"] = b["dnorm"]
@@ -105,12 +127,26 @@ def main():
         subset=["price", "area", "bedrooms", "bathrooms", "garage", "district", "category"]
     )
 
-    cols = (["area", "bedrooms", "bathrooms", "garage", "latitude", "longitude",
-             "district", "price", "category", "iptu", "condo", "n_amenities"] + present)
+    cols = [
+        "area",
+        "bedrooms",
+        "bathrooms",
+        "garage",
+        "latitude",
+        "longitude",
+        "district",
+        "price",
+        "category",
+        "iptu",
+        "condo",
+        "n_amenities",
+    ] + present
     b = b[cols]
     b.to_csv(OUT, index=False, encoding="utf-8")
     print(f"💾 Salvo: {OUT}  ({len(b)} linhas, {len(cols)} colunas)")
-    print(f"   apartamentos: {(b.category=='Apartamentos').sum()} | casas: {(b.category=='Casas').sum()}")
+    print(
+        f"   apartamentos: {(b.category == 'Apartamentos').sum()} | casas: {(b.category == 'Casas').sum()}"
+    )
 
 
 if __name__ == "__main__":

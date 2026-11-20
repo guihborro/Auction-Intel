@@ -11,6 +11,7 @@ Pipeline (on-demand, por imóvel):
 Provider-agnóstico: `LLM_BASE_URL` / `LLM_API_KEY` / `LLM_MODEL` vêm do config/.env.
 Sem chave configurada, devolve {ok: False, reason} de forma limpa.
 """
+
 import json
 import re
 
@@ -64,6 +65,7 @@ class EditalAgent:
         self.client = None
         if self.key:
             from openai import OpenAI
+
             self.client = OpenAI(api_key=self.key, base_url=settings.LLM_BASE_URL)
 
     # ── Coleta de PDFs ──────────────────────────────────────────────────────
@@ -95,7 +97,7 @@ class EditalAgent:
     def _parse_json(content: str) -> dict:
         content = re.sub(r"^```(?:json)?|```$", "", content.strip(), flags=re.MULTILINE).strip()
         a, b = content.find("{"), content.rfind("}")
-        return json.loads(content[a:b + 1])
+        return json.loads(content[a : b + 1])
 
     def analisar(self, detail_url: str) -> dict:
         if not self.client:
@@ -105,19 +107,27 @@ class EditalAgent:
         fontes, corpus = [], []
         if edital_url:
             t = self._pdf_text(edital_url, MAX_EDITAL_CHARS)
-            if t: corpus.append("=== EDITAL ===\n" + t); fontes.append(edital_url)
+            if t:
+                corpus.append("=== EDITAL ===\n" + t)
+                fontes.append(edital_url)
         if matricula_url:
             t = self._pdf_text(matricula_url, MAX_MATRICULA_CHARS)
-            if t: corpus.append("=== MATRÍCULA ===\n" + t); fontes.append(matricula_url)
+            if t:
+                corpus.append("=== MATRÍCULA ===\n" + t)
+                fontes.append(matricula_url)
         if not corpus:
             return {"ok": False, "reason": "Nenhum PDF (edital/matrícula) encontrado no lote."}
 
         try:
             resp = self.client.chat.completions.create(
-                model=self.model, temperature=0,
+                model=self.model,
+                temperature=0,
                 messages=[
                     {"role": "system", "content": _SYSTEM},
-                    {"role": "user", "content": _SCHEMA_HINT + "\n\nDOCUMENTOS:\n" + "\n\n".join(corpus)},
+                    {
+                        "role": "user",
+                        "content": _SCHEMA_HINT + "\n\nDOCUMENTOS:\n" + "\n\n".join(corpus),
+                    },
                 ],
             )
             data = self._parse_json(resp.choices[0].message.content)

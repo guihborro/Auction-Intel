@@ -1,10 +1,11 @@
 import logging
 import re
 import time
+from typing import Any
 
 import requests
-from typing import List, Dict, Any
-from playwright.sync_api import sync_playwright, Page
+from playwright.sync_api import Page, sync_playwright
+
 from auction_intel.config import settings
 from auction_intel.schemas.output import ImovelPreview
 
@@ -14,67 +15,67 @@ logger = logging.getLogger(__name__)
 # ESTATÍSTICAS DE MERCADO
 # ==============================================================================
 AREA_STATS = {
-    20: {'bedrooms': 1, 'bathrooms': 1, 'garage': 1},
-    30: {'bedrooms': 1, 'bathrooms': 1, 'garage': 1},
-    40: {'bedrooms': 1, 'bathrooms': 1, 'garage': 1},
-    50: {'bedrooms': 2, 'bathrooms': 1, 'garage': 1},
-    60: {'bedrooms': 2, 'bathrooms': 2, 'garage': 1},
-    70: {'bedrooms': 2, 'bathrooms': 2, 'garage': 1},
-    80: {'bedrooms': 2, 'bathrooms': 2, 'garage': 2},
-    90: {'bedrooms': 3, 'bathrooms': 2, 'garage': 2},
-    100: {'bedrooms': 3, 'bathrooms': 3, 'garage': 2},
-    110: {'bedrooms': 3, 'bathrooms': 3, 'garage': 2},
-    120: {'bedrooms': 3, 'bathrooms': 3, 'garage': 2},
-    130: {'bedrooms': 3, 'bathrooms': 3, 'garage': 2},
-    140: {'bedrooms': 3, 'bathrooms': 3, 'garage': 2},
-    150: {'bedrooms': 3, 'bathrooms': 3, 'garage': 2},
-    160: {'bedrooms': 3, 'bathrooms': 4, 'garage': 2},
-    170: {'bedrooms': 3, 'bathrooms': 4, 'garage': 3},
-    180: {'bedrooms': 3, 'bathrooms': 4, 'garage': 3},
-    190: {'bedrooms': 3, 'bathrooms': 4, 'garage': 3},
-    200: {'bedrooms': 4, 'bathrooms': 4, 'garage': 3},
-    210: {'bedrooms': 3, 'bathrooms': 4, 'garage': 3},
-    220: {'bedrooms': 4, 'bathrooms': 4, 'garage': 3},
-    230: {'bedrooms': 3, 'bathrooms': 4, 'garage': 3},
-    240: {'bedrooms': 3, 'bathrooms': 4, 'garage': 3},
-    250: {'bedrooms': 4, 'bathrooms': 4, 'garage': 4},
-    260: {'bedrooms': 4, 'bathrooms': 4, 'garage': 3},
-    270: {'bedrooms': 4, 'bathrooms': 4, 'garage': 4},
-    280: {'bedrooms': 4, 'bathrooms': 4, 'garage': 3},
-    290: {'bedrooms': 4, 'bathrooms': 5, 'garage': 3},
-    300: {'bedrooms': 4, 'bathrooms': 4, 'garage': 4},
-    310: {'bedrooms': 4, 'bathrooms': 5, 'garage': 4},
-    320: {'bedrooms': 4, 'bathrooms': 4, 'garage': 4},
-    330: {'bedrooms': 4, 'bathrooms': 4, 'garage': 4},
-    340: {'bedrooms': 4, 'bathrooms': 4, 'garage': 3},
-    350: {'bedrooms': 4, 'bathrooms': 5, 'garage': 3},
-    360: {'bedrooms': 4, 'bathrooms': 4, 'garage': 4},
-    370: {'bedrooms': 4, 'bathrooms': 5, 'garage': 5},
-    380: {'bedrooms': 4, 'bathrooms': 4, 'garage': 4},
-    390: {'bedrooms': 4, 'bathrooms': 4, 'garage': 4},
-    400: {'bedrooms': 4, 'bathrooms': 4, 'garage': 4},
-    410: {'bedrooms': 3, 'bathrooms': 5, 'garage': 4},
-    420: {'bedrooms': 4, 'bathrooms': 4, 'garage': 7},
-    430: {'bedrooms': 3, 'bathrooms': 6, 'garage': 6},
-    440: {'bedrooms': 4, 'bathrooms': 5, 'garage': 3},
-    450: {'bedrooms': 4, 'bathrooms': 5, 'garage': 3},
-    460: {'bedrooms': 3, 'bathrooms': 5, 'garage': 3},
-    470: {'bedrooms': 4, 'bathrooms': 6, 'garage': 5},
-    480: {'bedrooms': 4, 'bathrooms': 5, 'garage': 4},
-    490: {'bedrooms': 4, 'bathrooms': 5, 'garage': 2},
-    500: {'bedrooms': 4, 'bathrooms': 5, 'garage': 4},
-    510: {'bedrooms': 4, 'bathrooms': 5, 'garage': 3},
-    530: {'bedrooms': 3, 'bathrooms': 5, 'garage': 4},
-    540: {'bedrooms': 4, 'bathrooms': 6, 'garage': 4},
-    550: {'bedrooms': 3, 'bathrooms': 5, 'garage': 5},
-    560: {'bedrooms': 3, 'bathrooms': 6, 'garage': 5},
-    570: {'bedrooms': 4, 'bathrooms': 6, 'garage': 8},
-    590: {'bedrooms': 6, 'bathrooms': 3, 'garage': 5},
-    600: {'bedrooms': 1, 'bathrooms': 3, 'garage': 1},
-    630: {'bedrooms': 4, 'bathrooms': 6, 'garage': 4},
-    640: {'bedrooms': 3, 'bathrooms': 6, 'garage': 6},
-    660: {'bedrooms': 4, 'bathrooms': 6, 'garage': 5},
-    670: {'bedrooms': 4, 'bathrooms': 3, 'garage': 2},
+    20: {"bedrooms": 1, "bathrooms": 1, "garage": 1},
+    30: {"bedrooms": 1, "bathrooms": 1, "garage": 1},
+    40: {"bedrooms": 1, "bathrooms": 1, "garage": 1},
+    50: {"bedrooms": 2, "bathrooms": 1, "garage": 1},
+    60: {"bedrooms": 2, "bathrooms": 2, "garage": 1},
+    70: {"bedrooms": 2, "bathrooms": 2, "garage": 1},
+    80: {"bedrooms": 2, "bathrooms": 2, "garage": 2},
+    90: {"bedrooms": 3, "bathrooms": 2, "garage": 2},
+    100: {"bedrooms": 3, "bathrooms": 3, "garage": 2},
+    110: {"bedrooms": 3, "bathrooms": 3, "garage": 2},
+    120: {"bedrooms": 3, "bathrooms": 3, "garage": 2},
+    130: {"bedrooms": 3, "bathrooms": 3, "garage": 2},
+    140: {"bedrooms": 3, "bathrooms": 3, "garage": 2},
+    150: {"bedrooms": 3, "bathrooms": 3, "garage": 2},
+    160: {"bedrooms": 3, "bathrooms": 4, "garage": 2},
+    170: {"bedrooms": 3, "bathrooms": 4, "garage": 3},
+    180: {"bedrooms": 3, "bathrooms": 4, "garage": 3},
+    190: {"bedrooms": 3, "bathrooms": 4, "garage": 3},
+    200: {"bedrooms": 4, "bathrooms": 4, "garage": 3},
+    210: {"bedrooms": 3, "bathrooms": 4, "garage": 3},
+    220: {"bedrooms": 4, "bathrooms": 4, "garage": 3},
+    230: {"bedrooms": 3, "bathrooms": 4, "garage": 3},
+    240: {"bedrooms": 3, "bathrooms": 4, "garage": 3},
+    250: {"bedrooms": 4, "bathrooms": 4, "garage": 4},
+    260: {"bedrooms": 4, "bathrooms": 4, "garage": 3},
+    270: {"bedrooms": 4, "bathrooms": 4, "garage": 4},
+    280: {"bedrooms": 4, "bathrooms": 4, "garage": 3},
+    290: {"bedrooms": 4, "bathrooms": 5, "garage": 3},
+    300: {"bedrooms": 4, "bathrooms": 4, "garage": 4},
+    310: {"bedrooms": 4, "bathrooms": 5, "garage": 4},
+    320: {"bedrooms": 4, "bathrooms": 4, "garage": 4},
+    330: {"bedrooms": 4, "bathrooms": 4, "garage": 4},
+    340: {"bedrooms": 4, "bathrooms": 4, "garage": 3},
+    350: {"bedrooms": 4, "bathrooms": 5, "garage": 3},
+    360: {"bedrooms": 4, "bathrooms": 4, "garage": 4},
+    370: {"bedrooms": 4, "bathrooms": 5, "garage": 5},
+    380: {"bedrooms": 4, "bathrooms": 4, "garage": 4},
+    390: {"bedrooms": 4, "bathrooms": 4, "garage": 4},
+    400: {"bedrooms": 4, "bathrooms": 4, "garage": 4},
+    410: {"bedrooms": 3, "bathrooms": 5, "garage": 4},
+    420: {"bedrooms": 4, "bathrooms": 4, "garage": 7},
+    430: {"bedrooms": 3, "bathrooms": 6, "garage": 6},
+    440: {"bedrooms": 4, "bathrooms": 5, "garage": 3},
+    450: {"bedrooms": 4, "bathrooms": 5, "garage": 3},
+    460: {"bedrooms": 3, "bathrooms": 5, "garage": 3},
+    470: {"bedrooms": 4, "bathrooms": 6, "garage": 5},
+    480: {"bedrooms": 4, "bathrooms": 5, "garage": 4},
+    490: {"bedrooms": 4, "bathrooms": 5, "garage": 2},
+    500: {"bedrooms": 4, "bathrooms": 5, "garage": 4},
+    510: {"bedrooms": 4, "bathrooms": 5, "garage": 3},
+    530: {"bedrooms": 3, "bathrooms": 5, "garage": 4},
+    540: {"bedrooms": 4, "bathrooms": 6, "garage": 4},
+    550: {"bedrooms": 3, "bathrooms": 5, "garage": 5},
+    560: {"bedrooms": 3, "bathrooms": 6, "garage": 5},
+    570: {"bedrooms": 4, "bathrooms": 6, "garage": 8},
+    590: {"bedrooms": 6, "bathrooms": 3, "garage": 5},
+    600: {"bedrooms": 1, "bathrooms": 3, "garage": 1},
+    630: {"bedrooms": 4, "bathrooms": 6, "garage": 4},
+    640: {"bedrooms": 3, "bathrooms": 6, "garage": 6},
+    660: {"bedrooms": 4, "bathrooms": 6, "garage": 5},
+    670: {"bedrooms": 4, "bathrooms": 3, "garage": 2},
 }
 # ==============================================================================
 
@@ -83,16 +84,18 @@ AREA_STATS = {
 _OCCUPANCY_BOILERPLATE = re.compile(r"im[óo]veis\s+desocupados", re.IGNORECASE)
 
 
-def parse_detail_fields(text: str) -> Dict[str, Any]:
+def parse_detail_fields(text: str) -> dict[str, Any]:
     """Extrai campos estruturados do TEXTO da página de detalhe do leilão.
 
     Função pura (só regex sobre texto) — separada da parte de rede para ser
     testável sem navegador. Retorna dict com chaves sempre presentes:
     full_address, occupancy, appraisal_value, cadastral_sql (None quando ausente).
     """
-    out: Dict[str, Any] = {
-        "full_address": None, "occupancy": None,
-        "appraisal_value": None, "cadastral_sql": None,
+    out: dict[str, Any] = {
+        "full_address": None,
+        "occupancy": None,
+        "appraisal_value": None,
+        "cadastral_sql": None,
     }
     if not text:
         return out
@@ -131,9 +134,11 @@ def parse_detail_fields(text: str) -> Dict[str, Any]:
     # ── SQL cadastral (permite join com IPTU) ──────────────────────────────
     # Os editais usam rótulos variados: "Inscrição da Prefeitura", "Contribuinte
     # nº" etc. Tentamos os rótulos e, por fim, o padrão puro SSS.QQQ.LLLL-D.
-    m = (re.search(r"Inscri[çc][ãa]o da Prefeitura:?\s*(\d{3}\.\d{3}\.\d{4}-\d)", flat)
-         or re.search(r"Contribuinte\s*n?[ºo.]*\s*(\d{3}\.\d{3}\.\d{4}-\d)", flat, re.IGNORECASE)
-         or re.search(r"\b(\d{3}\.\d{3}\.\d{4}-\d)\b", flat))
+    m = (
+        re.search(r"Inscri[çc][ãa]o da Prefeitura:?\s*(\d{3}\.\d{3}\.\d{4}-\d)", flat)
+        or re.search(r"Contribuinte\s*n?[ºo.]*\s*(\d{3}\.\d{3}\.\d{4}-\d)", flat, re.IGNORECASE)
+        or re.search(r"\b(\d{3}\.\d{3}\.\d{4}-\d)\b", flat)
+    )
     if m:
         out["cadastral_sql"] = m.group(1)
 
@@ -144,61 +149,63 @@ class GeocodingService:
     BASE_URL = "https://nominatim.openstreetmap.org/search"
     _cache = {}
 
-    def get_coordinates(self, query: str) -> Dict[str, float]:
+    def get_coordinates(self, query: str) -> dict[str, float]:
         """Busca coordenadas com cache e múltiplas tentativas de formatação."""
-        if query in self._cache: return self._cache[query]
-        
+        if query in self._cache:
+            return self._cache[query]
+
         # Default: Marco Zero (Sé)
-        default = {'lat': -23.5505, 'lon': -46.6333}
-        if not query or len(query) < 2: return default
+        default = {"lat": -23.5505, "lon": -46.6333}
+        if not query or len(query) < 2:
+            return default
 
         # Limpeza: Remove "Bairro" para não confundir a API
         clean_query = query.replace("Bairro", "").strip()
-        
+
         # Estratégias de busca (do mais específico para o geral)
         attempts = [
             f"{clean_query}, São Paulo, Brazil",  # Ex: Santana, São Paulo, Brazil
-            f"{clean_query}, SP, Brazil",         # Ex: Santana, SP, Brazil
-            f"{clean_query}, Brazil"              # Ex: Santana, Brazil
+            f"{clean_query}, SP, Brazil",  # Ex: Santana, SP, Brazil
+            f"{clean_query}, Brazil",  # Ex: Santana, Brazil
         ]
-        
-        headers = {'User-Agent': 'AuctionSniper_Bot/5.0'} 
+
+        headers = {"User-Agent": "AuctionSniper_Bot/5.0"}
 
         for q in attempts:
             try:
                 # Delay para evitar bloqueio da API (Rate Limit)
                 time.sleep(0.5)
-                
+
                 resp = requests.get(
-                    self.BASE_URL, 
-                    params={'q': q, 'format': 'json', 'limit': 1}, 
-                    headers=headers, 
-                    timeout=3
+                    self.BASE_URL,
+                    params={"q": q, "format": "json", "limit": 1},
+                    headers=headers,
+                    timeout=3,
                 )
-                
+
                 if resp.ok and resp.json():
                     data = resp.json()[0]
-                    lat, lon = float(data['lat']), float(data['lon'])
-                    
+                    lat, lon = float(data["lat"]), float(data["lon"])
+
                     # Filtro Geográfico: Garante que caiu dentro do estado de SP aprox.
                     if -26 < lat < -19:
-                        res = {'lat': lat, 'lon': lon}
+                        res = {"lat": lat, "lon": lon}
                         self._cache[query] = res
                         return res
             except Exception:
                 continue
-        
+
         # Se falhar tudo, salva o default no cache para não tentar de novo
         self._cache[query] = default
         return default
 
-    def get_coordinates_for_address(self, address: str) -> Dict[str, float]:
+    def get_coordinates_for_address(self, address: str) -> dict[str, float]:
         """Geocoding PRECISO a partir do endereço completo (página de detalhe).
 
         Diferente de `get_coordinates` (que resolve por bairro), aqui usamos a
         rua+número → coordenada por imóvel. Cai no marco zero (Sé) se falhar.
         """
-        default = {'lat': -23.5505, 'lon': -46.6333}
+        default = {"lat": -23.5505, "lon": -46.6333}
         if not address or len(address) < 6:
             return default
 
@@ -221,21 +228,22 @@ class GeocodingService:
         ]
         attempts = list(dict.fromkeys(raw))  # remove duplicatas preservando ordem
 
-        headers = {'User-Agent': 'AuctionSniper_Bot/5.0'}
+        headers = {"User-Agent": "AuctionSniper_Bot/5.0"}
         for q in attempts:
             try:
                 time.sleep(0.5)  # respeita o rate limit do Nominatim
                 resp = requests.get(
                     self.BASE_URL,
-                    params={'q': q, 'format': 'json', 'limit': 1},
-                    headers=headers, timeout=5,
+                    params={"q": q, "format": "json", "limit": 1},
+                    headers=headers,
+                    timeout=5,
                 )
                 if resp.ok and resp.json():
                     d = resp.json()[0]
-                    lat, lon = float(d['lat']), float(d['lon'])
+                    lat, lon = float(d["lat"]), float(d["lon"])
                     # Bounding box aproximado da RMSP
                     if -24.5 < lat < -23.0 and -47.3 < lon < -46.0:
-                        res = {'lat': lat, 'lon': lon}
+                        res = {"lat": lat, "lon": lon}
                         self._cache[key] = res
                         return res
             except Exception:
@@ -244,10 +252,11 @@ class GeocodingService:
         self._cache[key] = default
         return default
 
+
 class BrowserService:
     def __init__(self):
         self.headless = settings.HEADLESS_BROWSER
-    
+
     def run_task(self, url: str, callback_func, **kwargs) -> Any:
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=self.headless, args=["--start-maximized"])
@@ -265,73 +274,86 @@ class BrowserService:
             finally:
                 browser.close()
 
+
 class AuctionTools:
     def __init__(self):
         self.browser_service = BrowserService()
         self.geocoder = GeocodingService()
 
     def _extract_number(self, text: str) -> float:
-        if not text: return 0.0
-        clean = re.sub(r'[^\d,]', '', text)
-        try: return float(clean.replace(',', '.'))
-        except: return 0.0
+        if not text:
+            return 0.0
+        clean = re.sub(r"[^\d,]", "", text)
+        try:
+            return float(clean.replace(",", "."))
+        except ValueError:
+            return 0.0
 
     def _infer_features_from_area(self, area: float) -> dict:
         """
         Consulta o mapa estatístico (AREA_STATS) para preencher dados faltantes.
         """
-        if area <= 0: return {'bedrooms': 1, 'bathrooms': 1, 'garage': 0}
-        
+        if area <= 0:
+            return {"bedrooms": 1, "bathrooms": 1, "garage": 0}
+
         # Binning: Arredonda para a dezena mais próxima para bater com as chaves do dict
         area_bin = int((area // 10) * 10)
-        
+
         # Garante que está dentro dos limites do nosso dicionário
-        if not AREA_STATS: return {'bedrooms': 2, 'bathrooms': 1, 'garage': 1} # Fallback se dict vazio
-        
+        if not AREA_STATS:
+            return {"bedrooms": 2, "bathrooms": 1, "garage": 1}  # Fallback se dict vazio
+
         min_bin = min(AREA_STATS.keys())
         max_bin = max(AREA_STATS.keys())
-        
-        if area_bin < min_bin: area_bin = min_bin
-        if area_bin > max_bin: area_bin = max_bin
-        
-        return AREA_STATS.get(area_bin, {'bedrooms': 2, 'bathrooms': 1, 'garage': 1})
 
-    def _scrape_listings_logic(self, _service, page: Page) -> List[ImovelPreview]:
+        if area_bin < min_bin:
+            area_bin = min_bin
+        if area_bin > max_bin:
+            area_bin = max_bin
+
+        return AREA_STATS.get(area_bin, {"bedrooms": 2, "bathrooms": 1, "garage": 1})
+
+    def _scrape_listings_logic(self, _service, page: Page) -> list[ImovelPreview]:
         """Extrai dados dos cards da listagem."""
-        try: 
+        try:
             page.wait_for_selector(".card-content", timeout=5000)
-        except: 
+        except Exception:
             pass
 
         cards = page.query_selector_all(".card-content")
         logger.info("Processando %d cards...", len(cards))
-        
+
         results = []
         for card in cards:
             title_debug = "Desconhecido"
             try:
                 title_el = card.query_selector(".card-title")
                 price_el = card.query_selector(".card-price")
-                
-                if not title_el or not price_el: continue
+
+                if not title_el or not price_el:
+                    continue
 
                 title = title_el.inner_text().strip()
-                title_debug = title # Para log de erro
-                
+                title_debug = title  # Para log de erro
+
                 link = title_el.get_attribute("href")
-                if link and link.startswith("/"): link = f"https://www.megaleiloes.com.br{link}"
-                
+                if link and link.startswith("/"):
+                    link = f"https://www.megaleiloes.com.br{link}"
+
                 price = self._extract_number(price_el.inner_text().strip())
-                
+
                 # 1. Extração de Área (Regex)
                 area = 0.0
-                area_match = re.search(r'(\d+)\s*m²', title, re.IGNORECASE)
-                if area_match: area = float(area_match.group(1))
+                area_match = re.search(r"(\d+)\s*m²", title, re.IGNORECASE)
+                if area_match:
+                    area = float(area_match.group(1))
 
                 # 2. Extração de Bairro (Lógica de Hífen)
                 district = "São Paulo"
                 # Limpa sufixos comuns
-                clean_title = title.replace(" - SP", "").replace(" - São Paulo", "").replace(" / SP", "")
+                clean_title = (
+                    title.replace(" - SP", "").replace(" - São Paulo", "").replace(" / SP", "")
+                )
                 if "-" in clean_title:
                     # Pega o último pedaço após o traço
                     district = clean_title.split("-")[-1].strip().title()
@@ -339,22 +361,26 @@ class AuctionTools:
                 # 3. Tenta Regex para Vagas e Quartos
                 garage = 0
                 bedrooms = 0
-                
-                garage_match = re.search(r'(\d+)\s*(?:vaga|garagem|auto)', title, re.IGNORECASE)
-                if garage_match: garage = int(garage_match.group(1))
-                
-                bed_match = re.search(r'(\d+)\s*(?:dorm|quarto|suíte|suite)', title, re.IGNORECASE)
-                if bed_match: bedrooms = int(bed_match.group(1))
+
+                garage_match = re.search(r"(\d+)\s*(?:vaga|garagem|auto)", title, re.IGNORECASE)
+                if garage_match:
+                    garage = int(garage_match.group(1))
+
+                bed_match = re.search(r"(\d+)\s*(?:dorm|quarto|suíte|suite)", title, re.IGNORECASE)
+                if bed_match:
+                    bedrooms = int(bed_match.group(1))
 
                 # 4. Inferência Estatística (Preenche o que faltou)
                 # Banheiros quase nunca tem no título, então sempre inferimos ou usamos default
                 bathrooms = 1
-                
+
                 if area > 10:
                     stats = self._infer_features_from_area(area)
-                    if bedrooms == 0: bedrooms = stats['bedrooms']
-                    if garage == 0: garage = stats['garage']
-                    bathrooms = stats['bathrooms']
+                    if bedrooms == 0:
+                        bedrooms = stats["bedrooms"]
+                    if garage == 0:
+                        garage = stats["garage"]
+                    bathrooms = stats["bathrooms"]
 
                 # Extração da imagem (data-bg do elemento .card-image irmão)
                 image_url = card.evaluate(
@@ -380,10 +406,10 @@ class AuctionTools:
                 # AGORA O ERRO É MOSTRADO NO TERMINAL
                 logger.warning("Erro ao processar card '%s': %s", title_debug, e)
                 continue
-        
+
         return results
 
-    def _scrape_all_pages_logic(self, _service, page: Page, base_url: str) -> List[ImovelPreview]:
+    def _scrape_all_pages_logic(self, _service, page: Page, base_url: str) -> list[ImovelPreview]:
         """Percorre as páginas da vitrine (?pagina=N) até esgotar.
 
         A vitrine do Mega Leilões é paginada; o robô lê a página 1 (já carregada),
@@ -410,17 +436,19 @@ class AuctionTools:
         return todos
 
     # --- MÉTODOS PÚBLICOS ---
-    def fetch_listings(self, url: str) -> List[ImovelPreview]:
+    def fetch_listings(self, url: str) -> list[ImovelPreview]:
         return self.browser_service.run_task(url, self._scrape_all_pages_logic, base_url=url) or []
 
-    def get_geo_location(self, district: str) -> Dict[str, float]:
+    def get_geo_location(self, district: str) -> dict[str, float]:
         return self.geocoder.get_coordinates(district)
 
-    def scrape_property_details(self, url: str) -> Dict[str, Any]:
+    def scrape_property_details(self, url: str) -> dict[str, Any]:
         """Acessa a página interna para pegar texto completo (Fase 2)."""
+
         def logic(_s, p):
             p.wait_for_load_state("networkidle")
             return {"full_text_content": p.evaluate("() => document.body.innerText")}
+
         return self.browser_service.run_task(url, logic)
 
     def enrich_from_detail(self, item: ImovelPreview) -> ImovelPreview:

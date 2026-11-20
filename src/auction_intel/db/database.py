@@ -6,9 +6,7 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 from auction_intel.config import settings
 
 # check_same_thread só existe (e só é necessário) no SQLite
-_connect_args = (
-    {"check_same_thread": False} if settings.DATABASE_URL.startswith("sqlite") else {}
-)
+_connect_args = {"check_same_thread": False} if settings.DATABASE_URL.startswith("sqlite") else {}
 
 engine = create_engine(settings.DATABASE_URL, connect_args=_connect_args)
 

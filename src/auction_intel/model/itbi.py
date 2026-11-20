@@ -12,6 +12,7 @@ coordenada do imóvel:
 
 Sempre devolve um piso quando há área + alguma coordenada; só falha sem coordenada.
 """
+
 import logging
 import re
 
@@ -77,20 +78,35 @@ class ValuationEngineITBI:
 
         # Tier 1: CADASTRAL (SQL exato + quadra)
         if attrs is not None and qcoord is not None:
-            rec = {"area": attrs["area_construida"], "area_terreno": attrs["area_terreno"],
-                   "fracao_ideal": attrs["fracao_ideal"], "idade": attrs["idade"],
-                   "latitude": qcoord[0], "longitude": qcoord[1],
-                   "setor": sql11[:3], "padrao": attrs["padrao"]}
-            return {"servable": True, "tier": "cadastral", "price": self._predict(self.full, rec),
-                    "sql11": sql11, "area_usada": attrs["area_construida"]}
+            rec = {
+                "area": attrs["area_construida"],
+                "area_terreno": attrs["area_terreno"],
+                "fracao_ideal": attrs["fracao_ideal"],
+                "idade": attrs["idade"],
+                "latitude": qcoord[0],
+                "longitude": qcoord[1],
+                "setor": sql11[:3],
+                "padrao": attrs["padrao"],
+            }
+            return {
+                "servable": True,
+                "tier": "cadastral",
+                "price": self._predict(self.full, rec),
+                "sql11": sql11,
+                "area_usada": attrs["area_construida"],
+            }
 
         # Tier 2: ESTIMADO (geo-only) — coord da quadra se houver, senão do bairro
         coord = qcoord or ((lat, lon) if lat and lon else None)
         if area_anuncio and area_anuncio > 0 and coord:
             rec = {"area": float(area_anuncio), "latitude": coord[0], "longitude": coord[1]}
             price = self._predict(self.geo, rec, cols=self.geo_cols)
-            return {"servable": True, "tier": "estimado", "price": price,
-                    "sql11": sql11 or None, "area_usada": float(area_anuncio)}
+            return {
+                "servable": True,
+                "tier": "estimado",
+                "price": price,
+                "sql11": sql11 or None,
+                "area_usada": float(area_anuncio),
+            }
 
         return {"servable": False, "tier": None, "reason": "sem área ou coordenada"}
-

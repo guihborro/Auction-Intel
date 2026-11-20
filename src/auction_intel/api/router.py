@@ -1,5 +1,6 @@
 from fastapi import APIRouter
-from auction_intel.api.routes import health, analise, watchlist, auth
+
+from auction_intel.api.routes import analise, auth, health, watchlist
 
 api_router = APIRouter()
 

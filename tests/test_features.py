@@ -1,4 +1,5 @@
 """Testes do módulo de features compartilhado (train/serve sem skew)."""
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -69,6 +70,8 @@ class TestNormalizacaoBairro:
         assert features.norm_district(None) == ""
 
     def test_frame_devolve_uma_coluna_district(self):
-        out = features.normalize_district_frame(pd.DataFrame({"district": ["Vila Mariana", "MOEMA"]}))
+        out = features.normalize_district_frame(
+            pd.DataFrame({"district": ["Vila Mariana", "MOEMA"]})
+        )
         assert list(out.columns) == ["district"]
         assert out["district"].tolist() == ["vila mariana", "moema"]

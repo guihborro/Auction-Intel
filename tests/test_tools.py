@@ -3,6 +3,7 @@
 Nenhum destes testes acessa a rede ou o navegador: exercitam apenas a lógica
 determinística de parsing e imputação estatística.
 """
+
 import pytest
 
 from auction_intel.collection.scraper import AuctionTools

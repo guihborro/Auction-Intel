@@ -42,7 +42,11 @@ class _FakeTools:
                 title="Lote A", link="http://a", district="Moema", area_m2=70, auction_price=400_000
             ),
             ImovelPreview(
-                title="Lote B", link="http://b", district="Santana", area_m2=50, auction_price=200_000
+                title="Lote B",
+                link="http://b",
+                district="Santana",
+                area_m2=50,
+                auction_price=200_000,
             ),
         ]
 

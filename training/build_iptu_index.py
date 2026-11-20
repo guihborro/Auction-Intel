@@ -11,6 +11,7 @@ Processa todos os anos disponíveis; ano mais recente vence no dedup por SQL.
 Saída: datasets/iptu_index.csv  (sql11, area_construida, area_terreno,
 fracao_ideal, idade, padrao).
 """
+
 import glob
 import os
 import re
@@ -35,14 +36,16 @@ def parse_file(path):
         d = d[d[C_USO].astype(str).str.contains("APARTAMENTO", case=False, na=False)]
         if d.empty:
             continue
-        out = pd.DataFrame({
-            "sql11": d[C_SQL].astype("Int64").astype(str).str.zfill(11),
-            "area_construida": pd.to_numeric(d[C_AREA], errors="coerce"),
-            "area_terreno": pd.to_numeric(d[C_TERRENO], errors="coerce"),
-            "fracao_ideal": pd.to_numeric(d[C_FRACAO], errors="coerce"),
-            "ano_constr": pd.to_numeric(d[C_ANO], errors="coerce"),
-            "padrao": d[C_PADRAO].astype(str),
-        })
+        out = pd.DataFrame(
+            {
+                "sql11": d[C_SQL].astype("Int64").astype(str).str.zfill(11),
+                "area_construida": pd.to_numeric(d[C_AREA], errors="coerce"),
+                "area_terreno": pd.to_numeric(d[C_TERRENO], errors="coerce"),
+                "fracao_ideal": pd.to_numeric(d[C_FRACAO], errors="coerce"),
+                "ano_constr": pd.to_numeric(d[C_ANO], errors="coerce"),
+                "padrao": d[C_PADRAO].astype(str),
+            }
+        )
         out["_year"] = year
         frames.append(out)
     return pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
