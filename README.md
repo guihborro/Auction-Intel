@@ -136,7 +136,7 @@ Os dados brutos não ficam no repositório: são grandes e, no caso de editais e
 | `sp_2024_image_based.csv` | Kaggle, *Image-Based Property Price Prediction in São Paulo* (abril de 2024), baixado manualmente | `build_dataset_2024.py` |
 | `dataset.csv` | base antiga de anúncios de São Paulo | `filter_under_7m.py` |
 | `itbi_YYYY.xlsx` | Prefeitura de São Paulo, guias de ITBI pagas | `download_itbi_years.py`, `build_iptu_index.py` |
-| `itbi_2024_apartments.csv` | ITBI 2024 filtrado para apartamentos. `TODO(Guilherme): script ou passo a passo que gera este arquivo` | treino do piso ITBI, `build_sql_coords.py` |
+| `itbi_2024_apartments.csv` | guias de ITBI de 2024 da Prefeitura de São Paulo, filtradas para apartamentos. Esse preparo foi feito fora do repositório e o script não foi versionado | treino do piso ITBI, `build_sql_coords.py` |
 
 Ordem para retreinar o modelo de mercado:
 
